@@ -16,6 +16,9 @@
 
 //--- Exported types ---//
 //--- Exported constants ---//
+#define USE_FREQ_75KHZ
+#define USE_MOSFET_A_AND_B
+
 #if defined USE_FREQ_48KHZ
 #define DUTY_NONE		0
 #define DUTY_5_PERCENT		50
