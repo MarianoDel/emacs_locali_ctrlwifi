@@ -85,9 +85,13 @@ void USART1_IRQHandler(void)
     {
         dummy = USART1->RDR & 0x0FF;
 
-        if (prx1 < &rx1buff[SIZEOF_DATA])
+        if (prx1 < &rx1buff[SIZEOF_DATA - 1])
         {
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            //al /r no le doy bola
+            if (dummy == '\r')
+            {
+            }
+            else if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z
             {
                 *prx1 = '\0';
                 usart1_have_data = 1;
@@ -98,6 +102,8 @@ void USART1_IRQHandler(void)
                 prx1++;
             }
         }
+        else
+            prx1 = rx1buff;    //soluciona problema bloqueo con garbage
     }
 
     /* USART in mode Transmitter -------------------------------------------------*/
@@ -163,7 +169,7 @@ void USART1Config(void)
     ptx1_pckt_index = tx1buff;
     prx1 = rx1buff;
 
-    USART1->BRR = USART_9600;
+    USART1->BRR = USART_115200;
 //	USART1->CR2 |= USART_CR2_STOP_1;	//2 bits stop
 //	USART1->CR1 = USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;
 //	USART1->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_UE;	//SIN TX
@@ -176,6 +182,30 @@ void USART1Config(void)
 
     NVIC_EnableIRQ(USART1_IRQn);
     NVIC_SetPriority(USART1_IRQn, 5);
+}
+
+void Usart1Enable (void)
+{
+    unsigned int temp;
+
+    temp = GPIOA->AFR[1];
+    temp &= 0xFFFFF00F;
+    temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
+    GPIOA->AFR[1] = temp;
+
+    USART1->CR1 |= USART_CR1_UE;
+}
+
+void Usart1Disable (void)
+{
+    unsigned int temp;
+
+    USART1->CR1 &= ~(USART_CR1_UE);
+    
+    temp = GPIOA->AFR[1];
+    temp &= 0xFFFFF00F;
+    temp |= 0x00000000;	//PA10 -> AF0 PA9 -> AF0
+    GPIOA->AFR[1] = temp;
 }
 
 

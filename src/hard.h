@@ -72,6 +72,7 @@
 
 //GPIOA pin3
 #define JUMPER_DEFAULT    ((GPIOA->IDR & 0x0008) == 0)
+#define J2    JUMPER_DEFAULT
 
 //GPIOA pin4
 //GPIOA pin5
@@ -94,10 +95,11 @@
 //GPIOA pin10	usart1 tx rx
 
 //GPIOA pin11
-#define TACT_DEFAULT    ((GPIOA->IDR & 0x0800) == 0)
+#define TACT    ((GPIOA->IDR & 0x0800) == 0)
 
 //GPIOA pin12
 #define JUMPER_PROGRAM    ((GPIOA->IDR & 0x1000) == 0)
+#define J1    JUMPER_PROGRAM
 
 //GPIOA pin13	NC
 //GPIOA pin14	NC

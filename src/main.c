@@ -108,49 +108,80 @@ int main(void)
         }
     }
 
-    //--- Leo los parametros de memoria ---//
-
+//---------- Pruebas de Hardware --------//    
+        
     // while (1)
     // {
-    //  if (STOP_JUMPER)
-    //  {
-    //  	LED_OFF;
-    //  }
-    //  else
-    //  {
-    // 	  if (LED)
-    // 	  	LED_OFF;
-    // 	  else
-    // 	  	LED_ON;
-    //
-    // 	  Wait_ms (250);
-    //  }
+    //     if (TACT)
+    //     {
+    //         LED2_ON;
+    //         RELAY_MOTOR_ON;
+    //     }
+    //     else
+    //     {
+    //         LED2_OFF;
+    //         RELAY_MOTOR_OFF;
+    //     }
+     
     // }
 
-
-//---------- Pruebas de Hardware --------//
-    // EXTIOff ();
     USART1Config();
+
+    ii = 0;
+    while (1)
+    {
+        if (!timer_standby)
+        {
+            timer_standby = 2000;
+            Usart1Send("\ntest 1");
+        }
+
+        if ((J1) && (ii))
+        {
+            ii = 0;
+            Usart1Disable();
+        }
+        else if (!ii)
+        {
+            ii = 1;
+            Usart1Enable();
+        }
+            
+
+        // if (usart1_have_data)
+        // {
+        //     usart1_have_data = 0;
+        //     ii = ReadUsart1Buffer(s_lcd, sizeof(s_lcd));            
+
+        //     if ((ii) && (ii < sizeof(s_lcd)))
+        //     {
+        //         s_lcd[ii] = '\0';
+        //         Usart1Send(s_lcd);
+        //     }
+        // }
+    }
+
+//---------- Fin Pruebas de Hardware --------//    
     
     //---- Welcome Code ------------//
     //---- Defines from hard.h -----//
-#ifdef HARD
-    Usart1Send((char *) HARD);
-    Wait_ms(100);
-#else
-#error	"No Hardware defined in hard.h file"
-#endif
+// #ifdef HARD
+//     Usart1Send((char *) HARD);
+//     Wait_ms(100);
+// #else
+// #error	"No Hardware defined in hard.h file"
+// #endif
 
-#ifdef SOFT
-    Usart1Send((char *) SOFT);
-    Wait_ms(100);
-#else
-#error	"No Soft Version defined in hard.h file"
-#endif
+// #ifdef SOFT
+//     Usart1Send((char *) SOFT);
+//     Wait_ms(100);
+// #else
+// #error	"No Soft Version defined in hard.h file"
+// #endif
 
-#ifdef FEATURES
-    WelcomeCodeFeatures(s_lcd);
-#endif
+// #ifdef FEATURES
+//     WelcomeCodeFeatures(s_lcd);
+// #endif
     
 //---------- Versiones 1_2 y 2_0  --------//    
 #if (defined VER_2_0)
