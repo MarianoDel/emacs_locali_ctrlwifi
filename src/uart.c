@@ -188,6 +188,11 @@ void Usart1Enable (void)
 {
     unsigned int temp;
 
+    temp = GPIOA->MODER;	//2 bits por pin
+    temp &= 0xFFC3FFFF;		//PA9 PA10 alternative function
+    temp |= 0x00280000;		
+    GPIOA->MODER = temp;
+
     temp = GPIOA->AFR[1];
     temp &= 0xFFFFF00F;
     temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
@@ -206,6 +211,11 @@ void Usart1Disable (void)
     temp &= 0xFFFFF00F;
     temp |= 0x00000000;	//PA10 -> AF0 PA9 -> AF0
     GPIOA->AFR[1] = temp;
+
+    temp = GPIOA->MODER;	//2 bits por pin
+    temp &= 0xFFC3FFFF;		//PA9 PA10 input
+    temp |= 0x00000000;		
+    GPIOA->MODER = temp;    
 }
 
 

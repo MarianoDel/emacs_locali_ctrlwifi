@@ -125,9 +125,21 @@ int main(void)
      
     // }
 
-    USART1Config();
+    // USART1Config();
 
     ii = 0;
+    while (1)
+    {
+        if (!timer_standby)
+        {
+            timer_standby = 500;
+            if (LED1)
+                LED1_OFF;
+            else
+                LED1_ON;
+        }
+
+    }
     while (1)
     {
         if (!timer_standby)
