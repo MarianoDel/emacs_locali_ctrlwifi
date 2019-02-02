@@ -85,6 +85,7 @@ SRC += $(DEVDIR)/syscalls/syscalls.c
 
 SRC += ./src/adc.c
 # SRC += ./src/dsp.c
+SRC += ./src/comm.c
 SRC += ./src/flash_program.c
 SRC += ./src/gpio.c
 SRC += ./src/hard.c

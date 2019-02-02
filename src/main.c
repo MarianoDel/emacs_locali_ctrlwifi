@@ -20,6 +20,7 @@
 #include "tim.h"
 #include "uart.h"
 #include "hard.h"
+#include "comm.h"
 
 #include "core_cm0.h"
 #include "adc.h"
@@ -32,7 +33,8 @@
 
 
 //--- VARIABLES EXTERNAS ---//
-
+// ------- Externals del modulo comm  -------
+unsigned char receiv_cmd;
 
 // ------- Externals del Puerto serie  -------
 volatile unsigned char tx1buff[SIZEOF_DATA];
@@ -109,7 +111,7 @@ int main(void)
     }
 
 //---------- Pruebas de Hardware --------//    
-        
+    
     // while (1)
     // {
     //     if (TACT)
@@ -125,55 +127,134 @@ int main(void)
      
     // }
 
-    // USART1Config();
+    // ii = 0;
+    // while (1)
+    // {
+    //     if (!timer_standby)
+    //     {
+    //         timer_standby = 500;
+    //         if (LED1)
+    //             LED1_OFF;
+    //         else
+    //             LED1_ON;
+    //     }
 
-    ii = 0;
-    while (1)
-    {
-        if (!timer_standby)
-        {
-            timer_standby = 500;
-            if (LED1)
-                LED1_OFF;
-            else
-                LED1_ON;
-        }
+    // }
+    // while (1)
+    // {
+    //     if (!timer_standby)
+    //     {
+    //         timer_standby = 2000;
+            // Usart1Send("\ntest 1");
+    //     }
 
-    }
-    while (1)
-    {
-        if (!timer_standby)
-        {
-            timer_standby = 2000;
-            Usart1Send("\ntest 1");
-        }
-
-        if ((J1) && (ii))
-        {
-            ii = 0;
-            Usart1Disable();
-        }
-        else if (!ii)
-        {
-            ii = 1;
-            Usart1Enable();
-        }
+    //     if ((J1) && (ii))
+    //     {
+    //         ii = 0;
+    //         Usart1Disable();
+    //     }
+    //     else if (!ii)
+    //     {
+    //         ii = 1;
+    //         Usart1Enable();
+    //     }
             
 
-        // if (usart1_have_data)
-        // {
-        //     usart1_have_data = 0;
-        //     ii = ReadUsart1Buffer(s_lcd, sizeof(s_lcd));            
+    // USART1Config();
+    // while (1)
+    // {
+    //     if (usart1_have_data)
+    //     {
+    //         usart1_have_data = 0;
+    //         ii = ReadUsart1Buffer(s_lcd, sizeof(s_lcd));            
 
-        //     if ((ii) && (ii < sizeof(s_lcd)))
-        //     {
-        //         s_lcd[ii] = '\0';
-        //         Usart1Send(s_lcd);
-        //     }
-        // }
-    }
+    //         if ((ii) && (ii < sizeof(s_lcd)))
+    //         {
+    //             s_lcd[ii] = '\0';
+    //             Usart1Send(s_lcd);
+    //         }
+    //     }
+    // }
 
-//---------- Fin Pruebas de Hardware --------//    
+//---------- Fin Pruebas de Hardware --------//
+
+//---------- Codigo de Produccion --------//
+    USART1Config();
+
+    while (1)
+    {
+        switch (main_state)
+        {
+        case MAIN_INIT:
+            if (J_PROG_WIFI)
+            {
+                main_state = MAIN_DEBUG_WIFI;
+                Usart1Disable();
+            }
+            else
+                main_state = MAIN_WELCOME_CODE;
+            
+            break;
+
+        case MAIN_WELCOME_CODE:
+#ifdef FEATURES
+            WelcomeCodeFeatures(s_lcd);
+#endif
+            main_state = MAIN_WAIT_CONN;
+            ChangeLed(LED_STANDBY);
+            break;
+
+        case MAIN_WAIT_CONN:
+            if (receiv_cmd & CMD_OPEN)
+            {
+                receiv_cmd &= ~CMD_OPEN;
+                RELAY_MOTOR_ON;
+            }
+
+            if (receiv_cmd & CMD_CLOSE)
+            {
+                receiv_cmd &= ~CMD_CLOSE;
+                RELAY_MOTOR_OFF;
+            }
+
+            if (receiv_cmd & CMD_LIGHT_ON)
+            {
+                receiv_cmd &= ~CMD_LIGHT_ON;
+                RELAY_LIGHT_ON;
+            }
+
+            if (receiv_cmd & CMD_LIGHT_OFF)
+            {
+                receiv_cmd &= ~CMD_LIGHT_OFF;
+                RELAY_LIGHT_OFF;
+            }
+            
+            
+            break;
+            
+        case MAIN_DEBUG_WIFI:
+            //me quedo esperando que quiten el jumper
+            if (!J_PROG_WIFI)
+            {
+                main_state = MAIN_INIT;
+                Usart1Enable();
+            }
+            
+            break;
+
+        default:
+            main_state = MAIN_INIT;
+            break;
+        }
+
+        UpdateCommunications();
+        UpdateLed();
+
+    }    //end while 1
+
+
+//---------- Fin Codigo de Produccion --------//    
+
     
     //---- Welcome Code ------------//
     //---- Defines from hard.h -----//

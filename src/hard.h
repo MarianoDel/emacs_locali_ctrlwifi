@@ -98,8 +98,8 @@
 #define TACT    ((GPIOA->IDR & 0x0800) == 0)
 
 //GPIOA pin12
-#define JUMPER_PROGRAM    ((GPIOA->IDR & 0x1000) == 0)
-#define J1    JUMPER_PROGRAM
+#define J_PROG_WIFI    ((GPIOA->IDR & 0x1000) == 0)
+#define J1    J_PROG_WIFI
 
 //GPIOA pin13	NC
 //GPIOA pin14	NC
@@ -123,15 +123,9 @@
 typedef enum
 {
     MAIN_INIT = 0,
-    MAIN_SOFT_START,
-    MAIN_VOLTAGE_MODE,
-    MAIN_CURRENT_MODE,
-    MAIN_OVERCURRENT,
-    MAIN_JUMPER_PROTECTED,
-    MAIN_JUMPER_PROTECT_OFF,    
-    MAIN_GO_TO_FAILURE,
-    MAIN_OVERVOLTAGE,
-    MAIN_UNDERVOLTAGE,        
+    MAIN_WAIT_CONN,
+    MAIN_WELCOME_CODE,
+    MAIN_DEBUG_WIFI,
     MAINS_FAILURE
 
 } main_state_t;

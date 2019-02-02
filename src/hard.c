@@ -101,31 +101,22 @@ void UpdateLed (void)
 
 void WelcomeCodeFeatures (char * str)
 {
+#ifdef HARD
+            Usart1Send((char *) HARD);
+            Wait_ms(30);
+#else
+#error	"No Hardware defined in hard.h file"
+#endif
+
+#ifdef SOFT
+            Usart1Send((char *) SOFT);
+            Wait_ms(30);
+#else
+#error	"No Soft Version defined in hard.h file"
+#endif
+    
 #ifdef USE_FORWARD_MODE
     sprintf(str,"[%s] %s\n", __FILE__, str_macro(USE_FORWARD_MODE));
-    Usart1Send(str);
-    Wait_ms(30);    
-#endif
-
-#ifdef USE_PUSH_PULL_MODE
-    sprintf(str,"[%s] %s\n", __FILE__, str_macro(USE_PUSH_PULL_MODE));
-    Usart1Send(str);
-    Wait_ms(30);    
-#endif
-
-#ifdef WITH_OVERCURRENT_SHUTDOWN
-    sprintf(str,"[%s] %s\n", __FILE__, str_macro(WITH_OVERCURRENT_SHUTDOWN));
-    Usart1Send(str);
-    Wait_ms(30);    
-#endif
-
-#ifdef WITH_TIM14_FB
-    sprintf(str,"[%s] %s\n", __FILE__, str_macro(WITH_TIM14_FB));
-    Usart1Send(str);
-    Wait_ms(30);    
-#endif
-#ifdef WITH_TIM1_FB
-    sprintf(str,"[%s] %s\n", __FILE__, str_macro(WITH_TIM1_FB));
     Usart1Send(str);
     Wait_ms(30);    
 #endif

@@ -49,15 +49,15 @@ void GPIO_Config (void)
     if (!GPIOA_CLK)
         GPIOA_CLK_ON;
 
-    // temp = GPIOA->MODER;	//2 bits por pin
-    // temp &= 0xFC03FF03;		//PA1 PA2 output; PA3 input;
-    // temp |= 0x00280014;		//PA9 PA10 alternative function; PA11 PA12 Input;
-    // GPIOA->MODER = temp;
-
-    temp = GPIOA->MODER;	//2 bits por pin PRUEBAS EN GPIO9 Y GPIO10
-    temp &= 0xFC3FFF03;		//PA1 PA2 output; PA3 input;
-    temp |= 0x00000014;		//PA9 PA10 no los toco; PA11 PA12 Input;
+    temp = GPIOA->MODER;	//2 bits por pin
+    temp &= 0xFC03FF03;		//PA1 PA2 output; PA3 input;
+    temp |= 0x00280014;		//PA9 PA10 alternative function; PA11 PA12 Input;
     GPIOA->MODER = temp;
+
+    // temp = GPIOA->MODER;	//2 bits por pin PRUEBAS EN GPIO9 Y GPIO10
+    // temp &= 0xFC3FFF03;		//PA1 PA2 output; PA3 input;
+    // temp |= 0x00000014;		//PA9 PA10 no los toco; PA11 PA12 Input;
+    // GPIOA->MODER = temp;
     
     temp = GPIOA->OTYPER;	//1 bit por pin
     temp &= 0xFFFFFFFF;

@@ -29,8 +29,8 @@
 //--- Externals variables ---//
 
 //--- Externals del GPS ---//
-extern volatile unsigned char usart1_mini_timeout;
-extern volatile unsigned char usart1_pckt_ready;
+// extern volatile unsigned char usart1_mini_timeout;
+// extern volatile unsigned char usart1_pckt_ready;
 extern volatile unsigned char usart1_have_data;
 
 extern volatile unsigned char tx1buff[];
@@ -85,6 +85,7 @@ void USART1_IRQHandler(void)
     {
         dummy = USART1->RDR & 0x0FF;
 
+        // Usart1SendSingle(dummy);
         if (prx1 < &rx1buff[SIZEOF_DATA - 1])
         {
             //al /r no le doy bola
