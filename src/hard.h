@@ -25,15 +25,7 @@
 //---- Features Configuration ----------------
 //features activated here and annouced in hard.c
 #define FEATURES
-
-#ifdef VER_1_0
-//-- Types of programs ----------
-
-//-- Types of led indications ----------
-
-//-- Other configs features ----------
-
-#endif    //ver_1_0
+#define USE_HW_WATCHDOG
 
 //---- End of Features Configuration ----------
 

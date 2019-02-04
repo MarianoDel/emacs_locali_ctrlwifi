@@ -94,6 +94,7 @@ SRC += ./src/tim.c
 # SRC += ./src/spi.c
 SRC += ./src/uart.c
 SRC += ./src/dma.c
+SRC += ./src/watchdog.c
 
 
 
@@ -207,6 +208,9 @@ flash:
 
 flash_lock:
 	sudo openocd -f stm32f0_flash_lock.cfg
+
+flash_watch:
+	sudo openocd -f stm32f0_flash_watchdog.cfg
 
 gdb:
 	sudo openocd -f stm32f0_gdb.cfg

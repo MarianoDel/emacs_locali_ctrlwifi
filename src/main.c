@@ -29,6 +29,7 @@
 #include "dsp.h"
 
 #include "it.h"
+#include "watchdog.h"
 
 
 
@@ -264,6 +265,10 @@ int main(void)
 
         UpdateCommunications();
         UpdateLed();
+
+#ifdef USE_HW_WATCHDOG
+        KickWatchdog();
+#endif
 
     }    //end while 1
 
