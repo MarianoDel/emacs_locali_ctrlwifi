@@ -35,6 +35,8 @@
 //--- VARIABLES EXTERNAS ---//
 // ------- Externals del modulo comm  -------
 unsigned char receiv_cmd;
+unsigned int wifi_requests = 0;
+unsigned int wifi_commands = 0;
 
 // ------- Externals del Puerto serie  -------
 volatile unsigned char tx1buff[SIZEOF_DATA];
@@ -59,8 +61,8 @@ volatile unsigned short take_temp_sample = 0;
 volatile unsigned short wait_ms_var = 0;
 volatile unsigned short timer_standby;
 volatile unsigned short secs = 0;
-volatile unsigned char hours = 0;
-volatile unsigned char minutes = 0;
+volatile unsigned int seconds = 0;
+
 
 
 
@@ -189,6 +191,7 @@ int main(void)
             if (J_PROG_WIFI)
             {
                 main_state = MAIN_DEBUG_WIFI;
+                ChangeLed(LED_DEBUGGING);
                 Usart1Disable();
             }
             else
@@ -209,12 +212,14 @@ int main(void)
             {
                 receiv_cmd &= ~CMD_OPEN;
                 RELAY_MOTOR_ON;
+                LED2_ON;
             }
 
             if (receiv_cmd & CMD_CLOSE)
             {
                 receiv_cmd &= ~CMD_CLOSE;
                 RELAY_MOTOR_OFF;
+                LED2_OFF;
             }
 
             if (receiv_cmd & CMD_LIGHT_ON)
@@ -228,8 +233,18 @@ int main(void)
                 receiv_cmd &= ~CMD_LIGHT_OFF;
                 RELAY_LIGHT_OFF;
             }
-            
-            
+
+            //manda la info de diagnostico
+            if (!timer_standby)
+            {
+                timer_standby = 10000;
+                sprintf(s_lcd, "requests: %d\r\n", wifi_requests);
+                Usart1Send(s_lcd);
+                sprintf(s_lcd, "commands: %d\r\n", wifi_commands);
+                Usart1Send(s_lcd);
+                sprintf(s_lcd, "seconds: %d\r\n", seconds);
+                Usart1Send(s_lcd);
+            }
             break;
             
         case MAIN_DEBUG_WIFI:
@@ -404,22 +419,14 @@ void TimingDelay_Decrement(void)
     if (timer_led)
         timer_led--;
 
-    // //cuenta de a 1 minuto
-    // if (secs > 59999)	//pasaron 1 min
-    // {
-    // 	minutes++;
-    // 	secs = 0;
-    // }
-    // else
-    // 	secs++;
-    //
-    // if (minutes > 60)
-    // {
-    // 	hours++;
-    // 	minutes = 0;
-    // }
-
-
+    //cuenta los segundos alive
+    if (secs < 1000)	//paso 1 segundo
+    	secs++;
+    else
+    {
+    	secs = 0;
+        seconds++;
+    }
 }
 
 

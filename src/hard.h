@@ -146,8 +146,7 @@ typedef enum
 #define LED_GENERATING                2
 #define LED_LOW_VOLTAGE               3
 #define LED_PROTECTED                 4
-#define LED_VIN_ERROR                 5
-#define LED_OVERCURRENT_ERROR         6
+#define LED_DEBUGGING                 5
 
 
 #define SIZEOF_DATA1	512

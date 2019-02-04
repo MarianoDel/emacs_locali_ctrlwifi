@@ -24,6 +24,8 @@
 //--- del main
 extern const char s_ok [];
 extern unsigned char receiv_cmd;
+extern unsigned int wifi_requests;
+extern unsigned int wifi_commands;
 
 //--- Externals del Puerto serie  -------
 extern unsigned char usart1_have_data;
@@ -37,6 +39,8 @@ const char s_open [] = {"OPEN"};
 const char s_close [] = {"CLOSE"};
 const char s_light_on [] = {"LIGHT-ON"};
 const char s_light_off [] = {"LIGHT-OFF"};
+
+const char s_new_client [] = {"New Client."};
 
 // Module Private Functions ------------------------------
 unsigned char SerialProcess (void);
@@ -78,16 +82,28 @@ resp_t InterpretarMsg (void)
 
         //-- Comandos comunes
         if (strncmp(pStr, s_open, sizeof(s_open) - 1) == 0)
+        {
             receiv_cmd |= CMD_OPEN;
+            wifi_commands++;
+        }
             
         else if (strncmp(pStr, s_close, sizeof(s_close) - 1) == 0)
+        {
             receiv_cmd |= CMD_CLOSE;
+            wifi_commands++;
+        }
 
         else if (strncmp(pStr, s_light_on, sizeof(s_light_on) - 1) == 0)
+        {
             receiv_cmd |= CMD_LIGHT_ON;
+            wifi_commands++;
+        }
 
         else if (strncmp(pStr, s_light_off, sizeof(s_light_off) - 1) == 0)
+        {
             receiv_cmd |= CMD_LIGHT_OFF;
+            wifi_commands++;
+        }
         
         
         //-- Frequency Setting
@@ -137,14 +153,18 @@ resp_t InterpretarMsg (void)
         //     }
         // }
 
-        //-- Ninguno de los anteriores
+        //-- Ningun Comando de los anteriores
         else
             resp = resp_error;
 
     }	//fin if comandos
 
-    
-
+    else if (strncmp(pStr, s_new_client, sizeof(s_new_client) - 1) == 0)
+    {
+        wifi_requests++;
+    }
+    else
+        resp = resp_error;
 
     return resp;
 }

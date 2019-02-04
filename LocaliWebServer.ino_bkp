@@ -1,0 +1,575 @@
+#include <ESP8266WiFi.h>
+
+IPAddress local_IP(192,168,0,11);
+IPAddress gateway(192,168,0,11);
+IPAddress subnet(255,255,255,0);
+
+// Set web server port number to 80
+WiFiServer server(80);
+
+// Variable to store the HTTP request
+String header;
+
+//buffer para comunicacion serie
+#define SIZEOF_BUFFER_SERIAL 128
+char serial_buff [SIZEOF_BUFFER_SERIAL];
+unsigned char serial_i = 0;
+
+//buffer para comunicacion WebServices
+// #define SIZEOF_BUFFER_WIFI 240
+// char wifi_buff [SIZEOF_BUFFER_WIFI];
+// unsigned char wifi_i = 0;
+// unsigned char two_endings = 0;
+// #define GET_CONTINUE    0
+// #define GET_URI    1
+// #define GET_PCKT_END    2
+
+// #define ANS_404    0
+// #define ANS_COMMAND    1
+// #define ANS_HEAD    2
+// #define ANS_FAVICON    3
+char s_wifi_commands [20] = {""};
+char s_wifi_requests [20] = {""};
+char s_wifi_seconds [20] = {""};
+
+void setup()
+{
+    boolean result = false;
+    
+    Serial.begin(115200);
+    Serial.println();
+
+    Serial.print("Setting soft-AP configuration ... ");
+    result = WiFi.softAPConfig(local_IP, gateway, subnet);
+    if (result)
+        Serial.println("Ready");
+    else
+        Serial.println("Failed!");
+
+    Serial.print("Setting soft-AP ... ");
+    result = Serial.println(WiFi.softAP("ControlWiFi01", "LocalizarT"));
+    if (result)
+        Serial.println("Ready");
+    else
+        Serial.println("Failed!");
+    
+    Serial.print("Soft-AP IP address = ");
+    Serial.println(WiFi.softAPIP());
+
+    Serial.print("Beging Server...");
+    server.begin();
+}
+
+void loop()
+{
+    char dataline [128];
+    WiFiClient client = server.available();   // Listen for incoming clients
+
+    if (client)
+    {                             // If a new client connects,
+        Serial.println("New Client.");          // print a message out in the serial port
+        String currentLine = "";                // make a String to hold incoming data from the client
+        //wifi_i = 0;    //reset index of buffer
+        //unsigned char answer = ANS_404;
+
+        //TODO: cambiar esto por StateMachine
+        while (client.connected())
+        {
+            // //ahora de todo el paquete solo quiero el uri y saber cuando termina
+            // if (ServerGetUri(&client, wifi_buff) == GET_URI)
+            // {
+            //     //proceso el URI recibido
+            //     Serial.println(wifi_buff);
+            //     if (strncmp (wifi_buff, "GET /favicon.ico", sizeof("GET /favicon.ico") - 1) == 0)
+            //     {
+            //         answer = ANS_FAVICON;
+            //     }
+
+            //     else if (strncmp (wifi_buff, "GET /open", sizeof("GET /open") - 1) == 0)
+            //     {
+            //         Serial.println("command: OPEN");
+            //         answer = ANS_COMMAND;
+            //     }
+
+            //     else if (strncmp (wifi_buff, "GET /close", sizeof("GET /close") - 1) == 0)
+            //     {
+            //         Serial.println("command: CLOSE");
+            //         answer = ANS_COMMAND;                    
+            //     }
+
+            //     else if (strncmp (wifi_buff, "GET /light_on", sizeof("GET /light_on") - 1) == 0)
+            //     {
+            //         Serial.println("command: LIGHT-ON");
+            //         answer = ANS_COMMAND;                    
+            //     }
+
+            //     else if (strncmp (wifi_buff, "GET /light_off", sizeof("GET /light_off") - 1) == 0)
+            //     {
+            //         Serial.println("command: LIGHT-OFF");
+            //         answer = ANS_COMMAND;                    
+            //     }
+
+            //     else if (strncmp (wifi_buff, "HEAD", sizeof("HEAD") - 1) == 0)
+            //     {
+            //         answer = ANS_HEAD;
+            //     }
+
+            //     else
+            //         answer = ANS_404;
+            // }
+
+            // else if (ServerGetUri(&client, wifi_buff) == GET_PCKT_END)
+            // {
+            //     switch (answer)
+            //     {
+            //     case ANS_COMMAND:
+            //         Serial.println("sending response");
+            //         client.println("HTTP/1.1 200 OK");
+            //         client.println("Content-type:text/html");
+            //         client.println("Connection: close");
+            //         client.println();
+
+            //         // Display the HTML web page
+            //         client.println("<!DOCTYPE html>");
+            //         client.println("<html>");
+            //         if (!data_available)
+            //             client.println("No Data!");
+            //         else
+            //             client.println("Done!");
+                        
+            //         client.println("</html>");            
+            //         // The HTTP response ends with another blank line
+            //         client.println();                    
+            //         break;
+
+            //     case ANS_HEAD:
+            //         Serial.println("head response");
+            //         client.println("HTTP/1.1 200 OK");
+            //         client.println("Content-type:text/html");
+            //         client.println("Connection: close");
+            //         client.println();                    
+            //         break;
+
+            //     case ANS_FAVICON:
+            //     case ANS_404:
+            //     default:
+            //         Serial.println("favicon or not good pckt");
+            //         client.println("HTTP/1.1 404");
+            //         client.println();
+            //         break;
+            //     }
+            //     break;    //break the while loop
+            // }
+                
+                
+
+            // if (ServerGetLine(&client, wifi_buff))
+            // if (ServerGetPckt(&client, wifi_buff))
+            // {
+            //     //parser de los datos de la linea
+            //     String header = String (wifi_buff);
+            //     //Serial.println(header);
+            //     if (header.indexOf("GET /favicon.ico") == 0)    //favicon ask en chrome
+            //     {
+            //         data_available = 3;
+            //     }
+            //     else if (header.indexOf("GET") == 0)    //es la linea GET que busco
+            //     {
+            //         // Serial.println("Nuevo GET");
+            //         // Serial.println(header);
+            //         data_available = URI_Parser (&header);
+
+            //         if (data_available != 3)
+            //         {
+            //             Serial.println("sending response");
+            //             client.println("HTTP/1.1 200 OK");
+            //             client.println("Content-type:text/html");
+            //             client.println("Connection: close");
+            //             client.println();
+
+            //             // Display the HTML web page
+            //             client.println("<!DOCTYPE html>");
+            //             client.println("<html>");
+            //             if (!data_available)
+            //                 client.println("No Data!");
+            //             else
+            //                 client.println("Done!");
+                        
+            //             client.println("</html>");            
+            //             // The HTTP response ends with another blank line
+            //             client.println();
+            //         }
+            //         else    //respuesta favicon
+            //         {
+            //             Serial.println("favicon answer");
+            //             client.println("HTTP/1.1 404");
+            //             client.println();
+            //         }
+            //     }
+            //     else if (header.indexOf("HEAD") == 0)    //respuestas al HEAD
+            //     {
+            //             Serial.println("head response");
+            //             client.println("HTTP/1.1 200 OK");
+            //             client.println("Content-type:text/html");
+            //             client.println("Connection: close");
+            //             client.println();
+            //     }
+            //           // Break out of the while loop
+            //         break;
+
+            // }    //end of if packet by packet
+
+            
+            // loop while the client's connected
+            if (client.available())
+            {             // if there's bytes to read from the client,
+                char c = client.read();             // read a byte, then
+                // Serial.write(c);                    // print it out the serial monitor
+                header += c;
+                if (c == '\n')
+                {                    // if the byte is a newline character
+                    // if the current line is blank, you got two newline characters in a row.
+                    // that's the end of the client HTTP request, so send a response:
+                    if (currentLine.length() == 0)
+                    {
+                        // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+                        // and a content-type so the client knows what's coming, then a blank line:
+
+                        //Parser del URI HTTP
+                        //tipo de paquete
+                        if (header.indexOf("GET") == 0)
+                        {
+                            unsigned char done = 0;
+                            
+                            if (header.indexOf("/open") > 0)
+                            {
+                                Serial.println("command: OPEN");
+                                done = 1;
+                            }
+                            else if (header.indexOf("/close") > 0)
+                            {
+                                Serial.println("command: CLOSE");
+                                done = 1;
+                            }
+                            else if (header.indexOf("/light_on") > 0)
+                            {
+                                Serial.println("command: LIGHT-ON");
+                                done = 1;
+                            }
+                            else if (header.indexOf("/light_off") > 0)
+                            {
+                                Serial.println("command: LIGHT-OFF");
+                                done = 1;
+                            }
+                            else if (header.indexOf("/favicon.ico") > 0)
+                            {
+                                Serial.println("favicon answer");
+                                client.println("HTTP/1.1 404");
+                                client.println();
+                            }
+                            else
+                            {
+                                client.println("HTTP/1.1 200 OK");
+                                client.println("Content-type:text/html");
+                                client.println("Connection: close");
+                                client.println();
+
+                                // Display the HTML web page
+                                client.println("<!DOCTYPE html><html>");
+                                client.printf("<p>stations: %d</p>\r\n", WiFi.softAPgetStationNum());
+                                client.printf("<p>requests: %s</p>\r\n", s_wifi_requests);
+                                client.printf("<p>commands: %s</p>\r\n", s_wifi_commands);
+                                client.printf("<p>alive secs: %s</p>\r\n", s_wifi_seconds);
+                                client.println("</html>");            
+                                // The HTTP response ends with another blank line
+                                client.println();
+                            }
+
+                            if (done)
+                            {
+                                client.println("HTTP/1.1 200 OK");
+                                client.println("Content-type:text/html");
+                                client.println("Connection: close");
+                                client.println();
+
+                                // Display the HTML web page
+                                client.println("<!DOCTYPE html><html>");
+                                client.println("Done!");
+                        
+                                client.println("</html>");            
+                                // The HTTP response ends with another blank line
+                                client.println();
+                            }
+
+
+                        }
+                        else if (header.indexOf("HEAD") == 0)
+                        {
+                            client.println("HTTP/1.1 200 OK");
+                            client.println("Content-type:text/html");
+                            client.println("Connection: close");
+                            client.println();
+
+                            Serial.println("head answer");
+                        }
+                        //Fin del Parser
+                        // Clear the header variable
+                        header = "";
+                        
+            
+                        
+                        // Break out of the while loop
+                        break;
+                    }
+                    else
+                    { // if you got a newline, then clear currentLine
+                        currentLine = "";
+                    }
+                }
+                else if (c != '\r')
+                {  // if you got anything else but a carriage return character,
+                    currentLine += c;      // add it to the end of the currentLine
+                }
+            }    //end of if char by char
+        }    //end of while
+
+        // Clear the header variable
+        //header = "";
+        
+        // Close the connection
+        client.stop();
+        Serial.println("Client disconnected.");
+        Serial.println("");
+    }
+
+    //cosas generales fuera del loop del cliente
+    if (SerialGetLine (serial_buff))
+    {      
+        if (strncmp(serial_buff, "requests: ", sizeof("requests: ") - 1) == 0)
+        {
+            bzero(s_wifi_requests, sizeof(s_wifi_requests));
+            strcpy(s_wifi_requests, (serial_buff + sizeof("requests: ") - 1));            
+        }         
+        if (strncmp(serial_buff, "commands: ", sizeof("commands: ") - 1) == 0)
+        {
+            bzero(s_wifi_commands, sizeof(s_wifi_commands));
+            strcpy(s_wifi_commands, (serial_buff + sizeof("commands: ") - 1));                        
+        }         
+        if (strncmp(serial_buff, "seconds: ", sizeof("seconds: ") - 1) == 0)
+        {
+            bzero(s_wifi_seconds, sizeof(s_wifi_seconds));
+            strcpy(s_wifi_seconds, (serial_buff + sizeof("seconds: ") - 1));            
+        }         
+    }
+    // Serial.printf("Stations connected = %d\n", WiFi.softAPgetStationNum());
+    // delay(3000);
+}
+
+
+//recibe la linea del GET y determina que hacer
+//contesta con 1 si hizo algo
+unsigned char URI_Parser (String * h)
+{
+    unsigned char done = 0;
+    
+    if (h->indexOf("/open") > 0)
+    {
+        Serial.println("command: OPEN");
+        done = 1;
+    }
+    else if (h->indexOf("/close") > 0)
+    {
+        Serial.println("command: CLOSE");
+        done = 1;
+    }
+    else if (h->indexOf("/light_on") > 0)
+    {
+        Serial.println("command: LIGHT-ON");
+        done = 1;
+    }
+    else if (h->indexOf("/light_off") > 0)
+    {
+        Serial.println("command: LIGHT-OFF");
+        done = 1;
+    }
+    return done;
+}
+
+
+//Desde el WebServer carga caracteres en un buffer hasta tener el paquete completo
+//resp = 0, faltan caracteres GET_CONTINUE
+//resp = 1, uri listo GET_URI
+//resp = 2, paquete terminado GET_PCKT_END
+// #define W_URI    0
+// #define W_FOLLOWING_LINES    1
+// unsigned char wifi_pckt_state = W_URI;
+// unsigned char ServerGetUri (WiFiClient * wc, char * str)
+// {
+//     unsigned char resp = GET_CONTINUE;
+
+//     if (wc->available())
+//     {
+//         char c = wc->read();
+//         //Serial.write(c);                    // print it out the serial monitor
+
+//         switch (wifi_pckt_state)
+//         {
+//         case W_URI:
+//             //guardo el primer renglon en el buffer
+//             if (c != '\n')
+//             {
+//                 str[wifi_i] = c;
+//                 if (wifi_i < SIZEOF_BUFFER_WIFI)
+//                     wifi_i++;
+//                 else
+//                     wifi_i = 0;    //buffer circular esperemos funcione
+//             }
+//             else
+//             {
+//                 str[wifi_i] = '\0';
+//                 wifi_i = 0;
+//                 resp = GET_URI;
+//                 wifi_pckt_state = W_FOLLOWING_LINES;
+//                 Serial.println("uri ends");
+//             }            
+//             break;
+
+//         case W_FOLLOWING_LINES:
+//             //estas lineas no me importan, solo quiero el \r\n\r\n de fin de paquete
+//             if (c == '\n')
+//             {
+//                 if (two_endings < 1)
+//                     two_endings++;
+//                 else
+//                 {
+//                     //termino el paquete
+//                     wifi_i = 0;
+//                     wifi_pckt_state = W_URI;
+//                     resp = GET_PCKT_END;
+//                     Serial.println("pckt ends");
+//                 }
+//             }
+//             else if (c != '\r')
+//             {
+//                 two_endings = 0;                
+//             }
+//             break;
+
+//         default:
+//             wifi_pckt_state = W_URI;
+//             break;
+//         }
+//     }    
+//     return resp;
+// }
+
+//Desde el WebServer carga caracteres en un buffer hasta tener el paquete completo
+//resp = 0, faltan caracteres
+//resp = 1, paquete listo
+// unsigned char ServerGetPckt (WiFiClient * wc, char * str)
+// {
+//     unsigned char resp = 0;
+
+//     if (wc->available())
+//     {
+//         char c = wc->read();
+//         //Serial.write(c);                    // print it out the serial monitor
+
+//         str[wifi_i] = c;
+
+//         if (wifi_i < SIZEOF_BUFFER_WIFI)
+//         {
+//             wifi_i++;
+//             if (c == '\n')
+//             {
+//                 if (two_endings != 1)
+//                     two_endings++;
+//                 else
+//                 {
+//                     wifi_i = 0;
+//                     resp = 1;
+//                 }
+//             }
+//             else if (c != '\r')
+//             {
+//                 two_endings = 0;                
+//             }
+//         }   
+//         else
+//         {
+//             wifi_i = 0;
+//             resp = 1;
+//         }        
+//     }    
+//     return resp;
+// }
+
+//Desde el WebServer carga caracteres en un buffer hasta tener una linea completa
+//resp = 0, faltan caracteres
+//resp = 1, la linea esta lista para leer
+// unsigned char ServerGetLine (WiFiClient * wc, char * str)
+// {
+//     unsigned char resp = 0;
+
+//     if (wc->available())
+//     {
+//         char c = wc->read();
+//         //Serial.write(c);                    // print it out the serial monitor
+//         if (c == '\r')
+//         {
+//         }
+//         else if (c == '\n')
+//         {
+//             str[wifi_i] = '\0';
+//             wifi_i = 0;
+//             two_endings++;
+    
+//             resp = 1;
+//         }
+//         else        
+//         {
+//             str[wifi_i] = c;
+//             two_endings = 0;
+    
+//             if (wifi_i < SIZEOF_BUFFER_WIFI)
+//                 wifi_i++;
+//             else
+//                 wifi_i = 0;    
+//         }
+//     }    
+//     return resp;
+// }
+
+//Desde el Puerto Serie carga caracteres en un buffer hasta tener una linea completa
+//resp = 0, faltan caracteres
+//resp = 1, la linea esta lista para leer
+unsigned char SerialGetLine (char * str)
+{
+    unsigned char resp = 0;
+
+    if (Serial.available())
+    {
+        char c = Serial.read();
+  
+        if (c == '\r')
+        {
+        }
+        else if (c == '\n')            
+        {
+            str[serial_i] = '\0';
+            serial_i = 0;
+    
+            resp = 1;
+        }
+        else        
+        {
+            str[serial_i] = c;
+    
+            if (serial_i < SIZEOF_BUFFER_SERIAL)
+                serial_i++;
+            else
+                serial_i = 0;    
+        }
+    }    
+    return resp;
+}
