@@ -212,6 +212,9 @@ flash_lock:
 flash_watch:
 	sudo openocd -f stm32f0_flash_watchdog.cfg
 
+flash_lock_watch:
+	sudo openocd -f stm32f0_flash_lock_watchdog.cfg
+
 gdb:
 	sudo openocd -f stm32f0_gdb.cfg
 

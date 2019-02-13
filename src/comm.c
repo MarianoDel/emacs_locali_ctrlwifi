@@ -35,6 +35,7 @@ char buffMessages [100];
 
 //--- Fixed Messages ---
 const char s_command [] = {"command:"};
+const char s_pulse [] = {"PULSE"};
 const char s_open [] = {"OPEN"};
 const char s_close [] = {"CLOSE"};
 const char s_light_on [] = {"LIGHT-ON"};
@@ -81,7 +82,12 @@ resp_t InterpretarMsg (void)
         pStr += sizeof(s_command);	//normalizo al mensaje, hay un espacio
 
         //-- Comandos comunes
-        if (strncmp(pStr, s_open, sizeof(s_open) - 1) == 0)
+        if (strncmp(pStr, s_pulse, sizeof(s_pulse) - 1) == 0)
+        {
+            receiv_cmd |= CMD_PULSE;
+            wifi_commands++;
+        }
+        else if (strncmp(pStr, s_open, sizeof(s_open) - 1) == 0)
         {
             receiv_cmd |= CMD_OPEN;
             wifi_commands++;

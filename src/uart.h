@@ -7,8 +7,8 @@
 // ##
 // #### UART.H ################################
 //---------------------------------------------
-#ifndef __UART_H
-#define __UART_H
+#ifndef _UART_H_
+#define _UART_H_
 
 //--- Exported types ---//
 //--- Exported constants ---//
@@ -56,5 +56,6 @@ void Usart2SendUnsigned(unsigned char *, unsigned char);
 void Usart2SendSingle(unsigned char );
 
 
-#endif
-//--- END OF FILE ---//
+#endif    /* _UART_H_ */
+
+//--- end of file ---//

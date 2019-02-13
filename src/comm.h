@@ -17,6 +17,7 @@
 #define CMD_CLOSE    0x02
 #define CMD_LIGHT_ON    0x04
 #define CMD_LIGHT_OFF    0x08
+#define CMD_PULSE    0x10
 
 //--- Exported constants ---//
 typedef enum {

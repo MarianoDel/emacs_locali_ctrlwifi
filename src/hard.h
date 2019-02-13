@@ -117,6 +117,7 @@ typedef enum
     MAIN_INIT = 0,
     MAIN_WAIT_CONN,
     MAIN_WELCOME_CODE,
+    MAIN_PULSE_ON,
     MAIN_DEBUG_WIFI,
     MAINS_FAILURE
 

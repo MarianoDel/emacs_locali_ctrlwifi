@@ -46,8 +46,9 @@ volatile unsigned char usart1_have_data = 0;
 
 // ------- Externals del o para el ADC -------
 volatile unsigned short adc_ch[ADC_CHANNEL_QUANTITY];
+#ifdef ADC_WITH_INT
 volatile unsigned char seq_ready = 0;
-
+#endif
 
 // ------- Externals para timers -------
 volatile unsigned short timer_led = 0;
@@ -61,6 +62,7 @@ volatile unsigned short take_temp_sample = 0;
 // ------- de los timers -------
 volatile unsigned short wait_ms_var = 0;
 volatile unsigned short timer_standby;
+volatile unsigned short timer_pulsed;
 volatile unsigned short secs = 0;
 volatile unsigned int seconds = 0;
 
@@ -209,6 +211,15 @@ int main(void)
             break;
 
         case MAIN_WAIT_CONN:
+            if (receiv_cmd & CMD_PULSE)
+            {
+                receiv_cmd &= ~CMD_PULSE;
+                RELAY_MOTOR_ON;
+                LED2_ON;
+                main_state = MAIN_PULSE_ON;
+                timer_pulsed = 1000;
+            }
+
             if (receiv_cmd & CMD_OPEN)
             {
                 receiv_cmd &= ~CMD_OPEN;
@@ -245,6 +256,15 @@ int main(void)
                 Usart1Send(s_lcd);
                 sprintf(s_lcd, "seconds: %d\r\n", seconds);
                 Usart1Send(s_lcd);
+            }
+            break;
+
+        case MAIN_PULSE_ON:
+            if (!timer_pulsed)
+            {
+                RELAY_MOTOR_OFF;
+                LED2_OFF;
+                main_state = MAIN_WAIT_CONN;
             }
             break;
             
@@ -424,6 +444,9 @@ void TimingDelay_Decrement(void)
     if (timer_led)
         timer_led--;
 
+    if (timer_pulsed)
+        timer_pulsed--;
+    
     //cuenta los segundos alive
     if (secs < 1000)	//paso 1 segundo
     	secs++;
